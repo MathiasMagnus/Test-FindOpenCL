@@ -1,0 +1,73 @@
+name: Consumption
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  check-hash:
+    runs-on: ubuntu-latest
+    outputs:
+      hash: ${{ steps.check.outputs.hash }}
+    steps:
+      - name: Check feature branch commit hash
+        id: check
+        shell: pwsh
+        run: |
+          $BranchInfo = git ls-remote https://github.com/MathiasMagnus/CMake.git | `
+            Select-String opencl-components
+          $BranchInfo -match '^[0-9a-f]+' | Out-Null
+          Write-Host "::set-output name=hash::$($matches[0])"
+
+  workflow:
+    needs: check-hash
+    runs-on: ${{ matrix.runs-on }}
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - runs-on: ubuntu-latest
+            preset: ninja-multi-config-gcc
+          - runs-on: windows-latest
+            preset: msbuild-msvc-v143
+    steps:
+      - name: Cache CMake
+        id: cache-cmake
+        uses: actions/cache@v3
+        with:
+          path: .cache/CMake/
+          key: ${{ runner.os }}-${{ needs.check-hash.outputs.hash }}
+      - name: Checkout CMake
+        if: steps.cache-cmake.outputs.cache-hit != 'true'
+        uses: actions/checkout@v3
+        with:
+          repository: MathiasMagnus/CMake
+          ref: opencl-components
+          path: .tmp/Source/CMake
+      - name: Build CMake
+        if: steps.cache-cmake.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          cmake ${{ matrix.bootstrap-configure-args }} `
+            -S ${{ github.workspace }}/.tmp/Source/CMake `
+            -B ${{ github.workspace }}/.tmp/Build/CMake
+          cmake `
+            --build ${{ github.workspace }}/.tmp/Build/CMake `
+            --parallel $([Environment]::ProcessorCount) `
+            --config Release
+          cmake `
+            --install ${{ github.workspace }}/.tmp/Build/CMake `
+            --config Release
+            --prefix ${{ github.workspace }}/.cache/CMake/
+      - name: Prepend custom CMake to Path
+        shell: pwsh
+        run: |
+          $env:Path = "${{ github.workspace }}/.cache/CMake/bin$(if($IsWindows) {';'} else {':'})${env:Path}"
+      - name: Checkout Test-FindOpenCL
+        uses: actions/checkout@v3
+      - name: Test FindOpenCL.cmake
+        shell: pwsh
+        run: |
+          cmake --workflow --preset ${{ matrix.preset }}
