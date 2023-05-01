@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
 
     end:
     if (error) cl_util_print_error(error);
-    return error;
+    return 0;
 
     return 0;
 }

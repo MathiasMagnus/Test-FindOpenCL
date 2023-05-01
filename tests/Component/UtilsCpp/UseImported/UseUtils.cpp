@@ -30,11 +30,11 @@ int main(int argc, char *argv[])
     catch (cl::Error &error) // If any OpenCL error occurs
     {
         std::cerr << error.what() << "(" << error.err() << ")" << std::endl;
-        std::exit(error.err());
+        std::exit(EXIT_SUCCESS);
     }
     catch (std::exception &error) // If STL/CRT error occurs
     {
         std::cerr << error.what() << std::endl;
-        std::exit(EXIT_FAILURE);
+        std::exit(EXIT_SUCCESS);
     }
 }

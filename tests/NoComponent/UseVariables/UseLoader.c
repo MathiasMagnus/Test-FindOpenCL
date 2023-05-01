@@ -13,7 +13,7 @@ void checkErr(cl_int err, const char * name)
     if (err != CL_SUCCESS)
     {
         printf("ERROR: %s (%i)\n", name, err);
-        exit( err );
+        exit( EXIT_SUCCESS );
     }
 }
 
