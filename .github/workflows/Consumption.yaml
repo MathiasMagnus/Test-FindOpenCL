@@ -19,7 +19,7 @@ jobs:
           $BranchInfo = git ls-remote https://github.com/MathiasMagnus/CMake.git | `
             Select-String opencl-components
           $BranchInfo -match '^[0-9a-f]+' | Out-Null
-          Write-Host "::set-output name=hash::$($matches[0])"
+          Add-Content $env:GITHUB_OUTPUT -Value "hash=$($matches[0])"
 
   workflow:
     needs: check-hash
@@ -67,6 +67,11 @@ jobs:
           $env:Path = "${{ github.workspace }}/.cache/CMake/bin$(if($IsWindows) {';'} else {':'})${env:Path}"
       - name: Checkout Test-FindOpenCL
         uses: actions/checkout@v3
+      - name: Install Ninja (Ubuntu)
+        if: matrix.runs-on == 'ubuntu-latest'
+        shell: pwsh
+        run: |
+          sudo apt install ninja-build -y
       - name: Test FindOpenCL.cmake
         shell: pwsh
         run: |
