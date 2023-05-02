@@ -30,15 +30,43 @@ jobs:
         include:
           - runs-on: ubuntu-latest
             preset: ninja-multi-config-gcc
-    #     - runs-on: windows-latest
-    #       preset: msbuild-msvc-v143
+            ninja-url: https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-linux.zip
+          - runs-on: windows-latest
+            preset: msbuild-msvc-v143
+            ninja-url: https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-win.zip
+            vs-root: 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise'
     steps:
+      - name: Cache Ninja
+        id: cache-ninja
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{ github.workspace }}/.cache/Ninja/
+          key: ${{ runner.os }}-ninja-${{ matrix.ninja-url }}
+      - name: Download Ninja
+        if: steps.cache-ninja.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          New-Item -Type Directory ${{ github.workspace }}/.tmp/Download | Out-Null
+          Invoke-WebRequest ${{ matrix.ninja-url }} -OutFile ${{ github.workspace }}/.tmp/Download/Ninja.zip `
+          Expand-Archive ${{ github.workspace }}/.tmp/Download/Ninja.zip -DestinationPath ${{ github.workspace }}/.cache/Ninja/ `
+          Remove-Item ${{ github.workspace }}/.tmp/Download/Ninja.zip
+      - name: Prepare build environment
+        shell: pwsh
+        run: |
+          $env:PATH = "${{ github.workspace }}/.cache/Ninja$(if($IsWindows) {';'} else {':'})${env:PATH}"
+          $env:PATH
+          Get-Command ninja
+          if ($IsWindows) { `
+            Import-Module "${{ matrix.vs-root }}\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
+            Enter-VsDevShell -VsInstallPath "${{ matrix.vs-root }}" -SkipAutomaticLocation -DevCmdArguments "-host_arch=x64 -arch=x64 -vcvars_ver=v143"
+          }
       - name: Cache CMake
         id: cache-cmake
         uses: actions/cache@v3
         with:
-          path: .cache/CMake/
-          key: ${{ runner.os }}-${{ needs.check-hash.outputs.hash }}
+          path: ${{ github.workspace }}/.cache/CMake/
+          key: ${{ runner.os }}-cmake-${{ needs.check-hash.outputs.hash }}
       - name: Checkout CMake
         if: steps.cache-cmake.outputs.cache-hit != 'true'
         uses: actions/checkout@v3
@@ -50,7 +78,7 @@ jobs:
         if: steps.cache-cmake.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-          cmake ${{ matrix.bootstrap-configure-args }} `
+          cmake -G 'Ninja Multi-Config' `
             -S ${{ github.workspace }}/.tmp/Source/CMake `
             -B ${{ github.workspace }}/.tmp/Build/CMake
           cmake `
@@ -61,20 +89,14 @@ jobs:
             --install ${{ github.workspace }}/.tmp/Build/CMake `
             --config Release `
             --prefix ${{ github.workspace }}/.cache/CMake/
-      - name: Prepend custom CMake to Path
+      - name: Prepend custom CMake to PATH
         shell: pwsh
         run: |
-          $env:Path = "${{ github.workspace }}/.cache/CMake/bin$(if($IsWindows) {';'} else {':'})${env:Path}"
-          $env:Path
-          Test-Path ${{ github.workspace }}/.cache/CMake/bin
+          $env:PATH = "${{ github.workspace }}/.cache/CMake/bin$(if($IsWindows) {';'} else {':'})${env:PATH}"
+          $env:PATH
           Get-Command cmake
       - name: Checkout Test-FindOpenCL
         uses: actions/checkout@v3
-      - name: Install Ninja (Ubuntu)
-        if: matrix.runs-on == 'ubuntu-latest'
-        shell: pwsh
-        run: |
-          sudo apt install ninja-build -y
       - name: Test FindOpenCL.cmake
         shell: pwsh
         run: |
