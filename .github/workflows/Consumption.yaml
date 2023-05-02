@@ -59,7 +59,7 @@ jobs:
           Get-Command ninja
           if ($IsWindows) {
             Import-Module "${{ matrix.vs-root }}\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
-            Enter-VsDevShell -VsInstallPath "${{ matrix.vs-root }}" -SkipAutomaticLocation -DevCmdArguments "-host_arch=x64 -arch=x64 -vcvars_ver=v143"
+            Enter-VsDevShell -VsInstallPath "${{ matrix.vs-root }}" -SkipAutomaticLocation -DevCmdArguments "-host_arch=x64 -arch=x64 -vcvars_ver=14.3"
           }
       - name: Cache CMake
         id: cache-cmake
