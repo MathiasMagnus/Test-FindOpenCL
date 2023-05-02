@@ -76,7 +76,7 @@ jobs:
         shell: pwsh
         run: |
           cmake -G 'Ninja Multi-Config' `
-            -D CMAKE_MAKE_PROGRAM='${{ github.workspace }}/.cache/Ninja/ninja'
+            -D CMAKE_MAKE_PROGRAM='${{ github.workspace }}/.cache/Ninja/ninja' ``
             -S ${{ github.workspace }}/.tmp/Source/CMake `
             -B ${{ github.workspace }}/.tmp/Build/CMake
           cmake `
