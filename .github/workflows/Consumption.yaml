@@ -48,8 +48,8 @@ jobs:
         shell: pwsh
         run: |
           New-Item -Type Directory ${{ github.workspace }}/.tmp/Download | Out-Null
-          Invoke-WebRequest ${{ matrix.ninja-url }} -OutFile ${{ github.workspace }}/.tmp/Download/Ninja.zip `
-          Expand-Archive ${{ github.workspace }}/.tmp/Download/Ninja.zip -DestinationPath ${{ github.workspace }}/.cache/Ninja/ `
+          Invoke-WebRequest ${{ matrix.ninja-url }} -OutFile ${{ github.workspace }}/.tmp/Download/Ninja.zip
+          Expand-Archive ${{ github.workspace }}/.tmp/Download/Ninja.zip -DestinationPath ${{ github.workspace }}/.cache/Ninja/
           Remove-Item ${{ github.workspace }}/.tmp/Download/Ninja.zip
       - name: Prepare build environment
         shell: pwsh
@@ -57,7 +57,7 @@ jobs:
           $env:PATH = "${{ github.workspace }}/.cache/Ninja$(if($IsWindows) {';'} else {':'})${env:PATH}"
           $env:PATH
           Get-Command ninja
-          if ($IsWindows) { `
+          if ($IsWindows) {
             Import-Module "${{ matrix.vs-root }}\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
             Enter-VsDevShell -VsInstallPath "${{ matrix.vs-root }}" -SkipAutomaticLocation -DevCmdArguments "-host_arch=x64 -arch=x64 -vcvars_ver=v143"
           }
