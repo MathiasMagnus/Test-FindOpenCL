@@ -30,8 +30,8 @@ jobs:
         include:
           - runs-on: ubuntu-latest
             preset: ninja-multi-config-gcc
-          - runs-on: windows-latest
-            preset: msbuild-msvc-v143
+    #     - runs-on: windows-latest
+    #       preset: msbuild-msvc-v143
     steps:
       - name: Cache CMake
         id: cache-cmake
@@ -65,6 +65,9 @@ jobs:
         shell: pwsh
         run: |
           $env:Path = "${{ github.workspace }}/.cache/CMake/bin$(if($IsWindows) {';'} else {':'})${env:Path}"
+          $env:Path
+          Test-Path ${{ github.workspace }}/.cache/CMake/bin
+          Get-Command cmake
       - name: Checkout Test-FindOpenCL
         uses: actions/checkout@v3
       - name: Install Ninja (Ubuntu)
