@@ -87,15 +87,11 @@ jobs:
             --install ${{ github.workspace }}/.tmp/Build/CMake `
             --config Release `
             --prefix ${{ github.workspace }}/.cache/CMake/
-      - name: Prepend custom CMake to PATH
-        shell: pwsh
-        run: |
-          $env:PATH = "${{ github.workspace }}/.cache/CMake/bin$(if($IsWindows) {';'} else {':'})${env:PATH}"
-          $env:PATH
-          Get-Command cmake
       - name: Checkout Test-FindOpenCL
         uses: actions/checkout@v3
       - name: Test FindOpenCL.cmake
         shell: pwsh
         run: |
-          cmake --workflow --preset ${{ matrix.preset }}
+          ${{ github.workspace }}/.cache/CMake/bin/cmake `
+            --workflow `
+            --preset ${{ matrix.preset }}

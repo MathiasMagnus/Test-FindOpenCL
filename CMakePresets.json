@@ -24,7 +24,13 @@
 		{
 			"name": "generator-ninja-multi-config",
 			"hidden": true,
-			"generator": "Ninja Multi-Config"
+			"generator": "Ninja Multi-Config",
+			"cacheVariables": {
+				"CMAKE_MAKE_PROGRAM": {
+					"type": "PATH",
+					"value": "$env{GITHUB_WORKSPACE}/.cache/Ninja/ninja"
+				}
+			}
 		},
 		{
 			"name": "toolchain-msbuild-c/c++-msvc-v143",
