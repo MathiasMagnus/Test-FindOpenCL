@@ -41,28 +41,28 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            ${{ runner.workspace }}/.cache/Ninja/
+            ${{ github.workspace }}/.cache/Ninja/
           key: ${{ runner.os }}-ninja-${{ matrix.ninja-url }}
       - name: Download Ninja
         if: steps.cache-ninja.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-          New-Item -Type Directory ${{ runner.workspace }}/.tmp/Download | Out-Null
-          Invoke-WebRequest ${{ matrix.ninja-url }} -OutFile ${{ runner.workspace }}/.tmp/Download/Ninja.zip
-          Expand-Archive ${{ runner.workspace }}/.tmp/Download/Ninja.zip -DestinationPath ${{ runner.workspace }}/.cache/Ninja/
-          Remove-Item ${{ runner.workspace }}/.tmp/Download/Ninja.zip
+          New-Item -Type Directory ${{ github.workspace }}/.tmp/Download | Out-Null
+          Invoke-WebRequest ${{ matrix.ninja-url }} -OutFile ${{ github.workspace }}/.tmp/Download/Ninja.zip
+          Expand-Archive ${{ github.workspace }}/.tmp/Download/Ninja.zip -DestinationPath ${{ github.workspace }}/.cache/Ninja/
+          Remove-Item ${{ github.workspace }}/.tmp/Download/Ninja.zip
       - name: Prepare build environment
         shell: pwsh
         run: |
           if ($IsWindows) {
             Import-Module "${{ matrix.vs-root }}\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
-            Enter-VsDevShell -VsInstallPath "${{ matrix.vs-root }}" -SkipAutomaticLocation -DevCmdArguments "-host_arch=x64 -arch=x64 -vcvars_ver=14.3"
+            Enter-VsDevShell -VsInstallPath "${{ matrix.vs-root }}" -SkipAutomaticLocation -DevCmdArguments "-host_arch=x64 -arch=x64"
           }
       - name: Cache CMake
         id: cache-cmake
         uses: actions/cache@v3
         with:
-          path: ${{ runner.workspace }}/.cache/CMake/
+          path: ${{ github.workspace }}/.cache/CMake/
           key: ${{ runner.os }}-cmake-${{ needs.check-hash.outputs.hash }}
       - name: Checkout CMake
         if: steps.cache-cmake.outputs.cache-hit != 'true'
@@ -76,22 +76,22 @@ jobs:
         shell: pwsh
         run: |
           cmake -G 'Ninja Multi-Config' `
-            -D CMAKE_MAKE_PROGRAM='${{ runner.workspace }}/.cache/Ninja/ninja' `
-            -S ${{ runner.workspace }}/.tmp/Source/CMake `
-            -B ${{ runner.workspace }}/.tmp/Build/CMake
+            -D CMAKE_MAKE_PROGRAM='${{ github.workspace }}/.cache/Ninja/ninja' `
+            -S ${{ github.workspace }}/.tmp/Source/CMake `
+            -B ${{ github.workspace }}/.tmp/Build/CMake
           cmake `
-            --build ${{ runner.workspace }}/.tmp/Build/CMake `
+            --build ${{ github.workspace }}/.tmp/Build/CMake `
             --parallel $([Environment]::ProcessorCount) `
             --config Release
           cmake `
-            --install ${{ runner.workspace }}/.tmp/Build/CMake `
+            --install ${{ github.workspace }}/.tmp/Build/CMake `
             --config Release `
-            --prefix ${{ runner.workspace }}/.cache/CMake/
+            --prefix ${{ github.workspace }}/.cache/CMake/
       - name: Checkout Test-FindOpenCL
         uses: actions/checkout@v3
       - name: Test FindOpenCL.cmake
         shell: pwsh
         run: |
-          ${{ runner.workspace }}/.cache/CMake/bin/cmake `
+          ${{ github.workspace }}/.cache/CMake/bin/cmake `
             --workflow `
             --preset ${{ matrix.preset }}
