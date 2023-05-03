@@ -28,9 +28,9 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          #- runs-on: ubuntu-latest
-          #  preset: ninja-multi-config-gcc
-          #  ninja-url: https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-linux.zip
+          - runs-on: ubuntu-latest
+            preset: ninja-multi-config-gcc
+            ninja-url: https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-linux.zip
           - runs-on: windows-latest
             preset: msbuild-msvc-v143
             ninja-url: https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-win.zip
@@ -51,13 +51,6 @@ jobs:
           Invoke-WebRequest ${{ matrix.ninja-url }} -OutFile ${{ github.workspace }}/.tmp/Download/Ninja.zip
           Expand-Archive ${{ github.workspace }}/.tmp/Download/Ninja.zip -DestinationPath ${{ github.workspace }}/.cache/Ninja/
           Remove-Item ${{ github.workspace }}/.tmp/Download/Ninja.zip
-      - name: Prepare build environment
-        shell: pwsh
-        run: |
-          if ($IsWindows) {
-            Import-Module "${{ matrix.vs-root }}\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
-            Enter-VsDevShell -VsInstallPath "${{ matrix.vs-root }}" -SkipAutomaticLocation -DevCmdArguments "-host_arch=x64 -arch=x64"
-          }
       - name: Cache CMake
         id: cache-cmake
         uses: actions/cache@v3
@@ -75,7 +68,10 @@ jobs:
         if: steps.cache-cmake.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-          cl.exe
+          if ($IsWindows) {
+            Import-Module "${{ matrix.vs-root }}\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
+            Enter-VsDevShell -VsInstallPath "${{ matrix.vs-root }}" -SkipAutomaticLocation -DevCmdArguments "-host_arch=x64 -arch=x64"
+          }
           cmake -G 'Ninja Multi-Config' `
             -D CMAKE_MAKE_PROGRAM='${{ github.workspace }}/.cache/Ninja/ninja' `
             -S ${{ github.workspace }}/.tmp/Source/CMake `
