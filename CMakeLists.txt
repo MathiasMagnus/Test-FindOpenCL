@@ -9,6 +9,18 @@ set(CMakeFeature2_EP_BASE "external" CACHE PATH "Path of external projects (rela
 
 set(EP_INSTALL_ROOT "${PROJECT_BINARY_DIR}/${CMakeFeature2_EP_BASE}/Install")
 
+if(CMAKE_GENERATOR MATCHES [[Ninja|Makefiles]])
+    set(Common_OPTIONS
+        "-DCMAKE_MAKE_PROGRAM:PATH=${CMAKE_MAKE_PROGRAM}"
+    )
+elseif(CMAKE_GENERATOR MATCHES [[Visual]])
+    set(Common_OPTIONS
+        "-DCMAKE_GENERATOR_INSTANCE:STRING=${MAKE_GENERATOR_INSTANCE}"
+        "-DCMAKE_GENERATOR_PLATFORM:STRING=${CMAKE_GENERATOR_PLATFORM}"
+        "-DCMAKE_GENERATOR_TOOLSET:STRING=${CMAKE_GENERATOR_TOOLSET}"  
+    )
+else()
+endif()
 set(OpenCL-Headers_OPTIONS
     "-DBUILD_TESTING:BOOL=OFF"
     "-DOPENCL_HEADERS_BUILD_TESTING:BOOL=OFF"
@@ -44,7 +56,7 @@ ExternalProject_Add(OpenCL-Headers
     GIT_SUBMODULES_RECURSE OFF
     GIT_SUBMODULES         ""
     GIT_SHALLOW            ON
-    CMAKE_CACHE_ARGS       ${OpenCL-Headers_OPTIONS}
+    CMAKE_CACHE_ARGS       "${Common_OPTIONS};${OpenCL-Headers_OPTIONS}"
 )
 ExternalProject_Add(OpenCL-CLHPP
     GIT_REPOSITORY         https://github.com/KhronosGroup/OpenCL-CLHPP.git
@@ -52,7 +64,7 @@ ExternalProject_Add(OpenCL-CLHPP
     GIT_SUBMODULES_RECURSE OFF
     GIT_SUBMODULES         ""
     GIT_SHALLOW            ON
-    CMAKE_CACHE_ARGS       ${OpenCL-CLHPP_OPTIONS}
+    CMAKE_CACHE_ARGS       "${Common_OPTIONS};${OpenCL-CLHPP_OPTIONS}"
     DEPENDS                OpenCL-Headers
 )
 ExternalProject_Add(OpenCL-ICD-Loader
@@ -61,7 +73,7 @@ ExternalProject_Add(OpenCL-ICD-Loader
     GIT_SUBMODULES_RECURSE OFF
     GIT_SUBMODULES         ""
     GIT_SHALLOW            ON
-    CMAKE_CACHE_ARGS       ${OpenCL-ICD-Loader_OPTIONS}
+    CMAKE_CACHE_ARGS       "${Common_OPTIONS};${OpenCL-ICD-Loader_OPTIONS}"
     DEPENDS                OpenCL-Headers
 )
 ExternalProject_Add(OpenCL-SDK
@@ -71,7 +83,7 @@ ExternalProject_Add(OpenCL-SDK
     GIT_TAG                install-fixes
     GIT_SUBMODULES_RECURSE OFF
     GIT_SHALLOW            ON
-    CMAKE_CACHE_ARGS       ${OpenCL-SDK_OPTIONS}
+    CMAKE_CACHE_ARGS       "${Common_OPTIONS};${OpenCL-SDK_OPTIONS}"
 )
 ExternalProject_Add(OpenCL-SDK-DLL
     #GIT_REPOSITORY         https://github.com/KhronosGroup/OpenCL-SDK.git
@@ -80,7 +92,7 @@ ExternalProject_Add(OpenCL-SDK-DLL
     GIT_TAG                install-fixes
     GIT_SUBMODULES_RECURSE OFF
     GIT_SHALLOW            ON
-    CMAKE_CACHE_ARGS       "${OpenCL-SDK_OPTIONS};-DBUILD_SHARED_LIBS:BOOL=ON"
+    CMAKE_CACHE_ARGS       "${Common_OPTIONS};${OpenCL-SDK_OPTIONS};-DBUILD_SHARED_LIBS:BOOL=ON"
 )
 
 add_subdirectory(tests)
