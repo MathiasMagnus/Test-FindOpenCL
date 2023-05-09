@@ -35,7 +35,7 @@ jobs:
           #  preset: msbuild-msvc-v143
           #  ninja-url: https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-win.zip
           - runs-on: macos-latest
-            preset: xcode-clang
+            preset: xcode
             ninja-url: https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-mac.zip
     defaults:
       run:
