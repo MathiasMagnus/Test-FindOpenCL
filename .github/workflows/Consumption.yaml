@@ -97,6 +97,25 @@ jobs:
       - name: Test FindOpenCL.cmake
         working-directory: ${{ github.workspace }}/.tmp/Source/Test-FindOpenCL
         run: |
-          ${{ github.workspace }}/.cache/CMake/bin/cmake `
-            --workflow `
-            --preset ${{ matrix.preset }}
+          if (-not $IsMacOS) { `
+            ${{ github.workspace }}/.cache/CMake/bin/cmake `
+              --workflow `
+              --preset ${{ matrix.preset }}
+          } else {
+            ${{ github.workspace }}/.cache/CMake/bin/cmake `
+              --preset xcode
+            ${{ github.workspace }}/.cache/CMake/bin/cmake `
+              --build --preset xcode-sdk-debug
+            ${{ github.workspace }}/.cache/CMake/bin/cmake `
+              --build --preset xcode-release
+            ${{ github.workspace }}/.cache/CMake/bin/cmake `
+              --build --preset xcode-debug
+            ls -al $GITHUB_WORKSPACE/build/xcode/external/Install/OpenCL-Headers &&
+            ls -al $GITHUB_WORKSPACE/build/xcode/external/Install/OpenCL-Headers/include &&
+            ls -al $GITHUB_WORKSPACE/build/xcode/external/Install/OpenCL-Headers/include/CL &&
+            ls -al $GITHUB_WORKSPACE/build/xcode/external/Install/OpenCL-Headers/include/OpenCL
+            ${{ github.workspace }}/.cache/CMake/bin/ctest `
+              --preset xcode-release
+            ${{ github.workspace }}/.cache/CMake/bin/ctest `
+              --preset xcode-debug
+          }
