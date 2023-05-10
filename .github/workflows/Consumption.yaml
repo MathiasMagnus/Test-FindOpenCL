@@ -110,10 +110,10 @@ jobs:
               --build --preset xcode-release
             ${{ github.workspace }}/.cache/CMake/bin/cmake `
               --build --preset xcode-debug
-            Get-ChildItem ${{ github.workspace }}/build/xcode/external/Install/OpenCL-Headers
-            Get-ChildItem ${{ github.workspace }}/build/xcode/external/Install/OpenCL-Headers/include
-            Get-ChildItem ${{ github.workspace }}/build/xcode/external/Install/OpenCL-Headers/include/CL
-            Get-ChildItem ${{ github.workspace }}/build/xcode/external/Install/OpenCL-Headers/include/OpenCL
+            Get-ChildItem ${{ github.workspace }}/.tmp/Source/Test-FindOpenCL/build/xcode/external/Install/OpenCL-Headers
+            Get-ChildItem ${{ github.workspace }}/.tmp/Source/Test-FindOpenCL/build/xcode/external/Install/OpenCL-Headers/include
+            Get-ChildItem ${{ github.workspace }}/.tmp/Source/Test-FindOpenCL/build/xcode/external/Install/OpenCL-Headers/include/CL
+            Get-ChildItem ${{ github.workspace }}/.tmp/Source/Test-FindOpenCL/build/xcode/external/Install/OpenCL-Headers/include/OpenCL
             ${{ github.workspace }}/.cache/CMake/bin/ctest `
               --preset xcode-release
             ${{ github.workspace }}/.cache/CMake/bin/ctest `
