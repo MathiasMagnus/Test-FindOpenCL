@@ -9,6 +9,10 @@ set(CMakeFeature2_EP_BASE "external" CACHE PATH "Path of external projects (rela
 
 set(EP_INSTALL_ROOT "${PROJECT_BINARY_DIR}/${CMakeFeature2_EP_BASE}/Install")
 
+# These Common_OPTIONS need to be given to _every_ external project, both those that fetch deps and those which will
+# constitute the actual tests, because ExternalProject doesn't relay the entire command-line given to it, most
+# problematic of all, it doesn't relay build-system related variables. If ninja isn't on the PATH, even if we
+# selected one explicitly in a preset file (or any other way), it will not find it.
 if(CMAKE_GENERATOR MATCHES [[Ninja|Makefiles]])
     set(Common_OPTIONS
         "-DCMAKE_MAKE_PROGRAM:PATH=${CMAKE_MAKE_PROGRAM}"
