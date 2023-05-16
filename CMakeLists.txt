@@ -63,8 +63,10 @@ ExternalProject_Add(OpenCL-Headers
     CMAKE_CACHE_ARGS       "${Common_OPTIONS};${OpenCL-Headers_OPTIONS}"
 )
 ExternalProject_Add(OpenCL-CLHPP
-    GIT_REPOSITORY         https://github.com/KhronosGroup/OpenCL-CLHPP.git
-    GIT_TAG                ${CMakeFeature2_USE_KHRONOS_RELEASE}
+    #GIT_REPOSITORY         https://github.com/KhronosGroup/OpenCL-CLHPP.git
+    #GIT_TAG                ${CMakeFeature2_USE_KHRONOS_RELEASE}
+    GIT_REPOSITORY         https://github.com/StreamHPC/OpenCL-CLHPP.git
+    GIT_TAG                no-system-headers-macos
     GIT_SUBMODULES_RECURSE OFF
     GIT_SUBMODULES         ""
     GIT_SHALLOW            ON
@@ -82,18 +84,18 @@ ExternalProject_Add(OpenCL-ICD-Loader
 )
 ExternalProject_Add(OpenCL-SDK
     #GIT_REPOSITORY         https://github.com/KhronosGroup/OpenCL-SDK.git
-    GIT_REPOSITORY         https://github.com/StreamHPC/OpenCL-SDK.git
     #GIT_TAG                ${CMakeFeature2_USE_KHRONOS_RELEASE}
-    GIT_TAG                install-fixes
+    GIT_REPOSITORY         https://github.com/StreamHPC/OpenCL-SDK.git
+    GIT_TAG                install-fixes-and-clhpp-no-framework-support
     GIT_SUBMODULES_RECURSE OFF
     GIT_SHALLOW            ON
     CMAKE_CACHE_ARGS       "${Common_OPTIONS};${OpenCL-SDK_OPTIONS}"
 )
 ExternalProject_Add(OpenCL-SDK-DLL
     #GIT_REPOSITORY         https://github.com/KhronosGroup/OpenCL-SDK.git
-    GIT_REPOSITORY         https://github.com/StreamHPC/OpenCL-SDK.git
     #GIT_TAG                ${CMakeFeature2_USE_KHRONOS_RELEASE}
-    GIT_TAG                install-fixes
+    GIT_REPOSITORY         https://github.com/StreamHPC/OpenCL-SDK.git
+    GIT_TAG                install-fixes-and-clhpp-no-framework-support
     GIT_SUBMODULES_RECURSE OFF
     GIT_SHALLOW            ON
     CMAKE_CACHE_ARGS       "${Common_OPTIONS};${OpenCL-SDK_OPTIONS};-DBUILD_SHARED_LIBS:BOOL=ON"
