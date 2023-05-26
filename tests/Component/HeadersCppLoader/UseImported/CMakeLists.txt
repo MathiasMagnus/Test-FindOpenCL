@@ -11,9 +11,9 @@ add_executable(UseImported UseLoader.cpp)
 target_link_libraries(UseImported PRIVATE OpenCL::Headers OpenCL::HeadersCpp OpenCL::OpenCL)
 target_compile_definitions(UseImported
     PRIVATE
-        CL_TARGET_OPENCL_VERSION=$<IF:$<PLATFORM_ID:Darwin>,120,300>
-        CL_HPP_TARGET_OPENCL_VERSION=$<IF:$<PLATFORM_ID:Darwin>,120,300>
-        CL_HPP_MINIMUM_OPENCL_VERSION=$<IF:$<PLATFORM_ID:Darwin>,120,300>
+        CL_TARGET_OPENCL_VERSION=300
+        CL_HPP_TARGET_OPENCL_VERSION=300
+        CL_HPP_MINIMUM_OPENCL_VERSION=300
         CL_HPP_ENABLE_EXCEPTIONS)
 target_compile_features(UseImported PRIVATE cxx_std_11)
 add_test(NAME UseImported COMMAND UseImported)

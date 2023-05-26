@@ -11,9 +11,9 @@ add_executable(UseUtils UseUtils.cpp)
 target_link_libraries(UseUtils PUBLIC OpenCL::Headers OpenCL::HeadersCpp OpenCL::Utils OpenCL::UtilsCpp OpenCL::OpenCL)
 target_compile_definitions(UseUtils
     PRIVATE
-        CL_TARGET_OPENCL_VERSION=$<IF:$<PLATFORM_ID:Darwin>,120,300>
-        CL_HPP_TARGET_OPENCL_VERSION=$<IF:$<PLATFORM_ID:Darwin>,120,300>
-        CL_HPP_MINIMUM_OPENCL_VERSION=$<IF:$<PLATFORM_ID:Darwin>,120,300>
+        CL_TARGET_OPENCL_VERSION=300
+        CL_HPP_TARGET_OPENCL_VERSION=300
+        CL_HPP_MINIMUM_OPENCL_VERSION=300
         CL_HPP_ENABLE_EXCEPTIONS)
 target_compile_features(UseUtils PRIVATE cxx_std_17)
 add_test(NAME UseUtils COMMAND UseUtils)
