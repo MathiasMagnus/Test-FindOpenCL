@@ -74,7 +74,11 @@
 			"inherits": [
 				"layout",
 				"generator-xcode"
-			]
+			],
+			"cacheVariables": {
+				"CMAKE_FIND_FRAMEWORK": "LAST",
+				"CMAKE_FIND_APPBUNDLE": "LAST"
+			}
 		}
 	],
 	"buildPresets": [
