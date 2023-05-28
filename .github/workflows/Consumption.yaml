@@ -28,12 +28,12 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          #- runs-on: ubuntu-latest
-          #  preset: ninja-multi-config-gcc
-          #  ninja-url: https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-linux.zip
-          #- runs-on: windows-latest
-          #  preset: msbuild-msvc-v143
-          #  ninja-url: https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-win.zip
+          - runs-on: ubuntu-latest
+            preset: ninja-multi-config-gcc
+            ninja-url: https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-linux.zip
+          - runs-on: windows-latest
+            preset: msbuild-msvc-v143
+            ninja-url: https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-win.zip
           - runs-on: macos-latest
             preset: xcode
             ninja-url: https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-mac.zip
