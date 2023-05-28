@@ -9,8 +9,7 @@
 		{
 			"name": "layout",
 			"hidden": true,
-			"binaryDir": "${sourceDir}/build/${presetName}",
-			"installDir": "${sourceDir}/install/${presetName}"
+			"binaryDir": "${sourceDir}/build/${presetName}"
 		},
 		{
 			"name": "generator-msbuild",
@@ -25,6 +24,11 @@
 			"name": "generator-ninja-multi-config",
 			"hidden": true,
 			"generator": "Ninja Multi-Config"
+		},
+		{
+			"name": "generator-xcode",
+			"hidden": true,
+			"generator": "Xcode"
 		},
 		{
 			"name": "toolchain-msbuild-c/c++-msvc-v143",
@@ -63,6 +67,18 @@
 				"generator-ninja-multi-config",
 				"toolchain-makefiles-c/c++-gcc"
 			]
+		},
+		{
+			"name": "xcode",
+			"displayName": "XCode",
+			"inherits": [
+				"layout",
+				"generator-xcode"
+			],
+			"cacheVariables": {
+				"CMAKE_FIND_FRAMEWORK": "LAST",
+				"CMAKE_FIND_APPBUNDLE": "LAST"
+			}
 		}
 	],
 	"buildPresets": [
@@ -84,6 +100,13 @@
 			"nativeToolOptions": [
 				"/nologo",
 				"/verbosity:minimal"
+			]
+		},
+		{
+			"name": "xcode-quiet",
+			"hidden": true,
+			"nativeToolOptions": [
+				"-quiet"
 			]
 		},
 		{
@@ -141,6 +164,37 @@
 			"displayName": "Debug",
 			"configuration": "Debug",
 			"configurePreset": "ninja-multi-config-gcc"
+		},
+		{
+			"name": "xcode-sdk-debug",
+			"displayName": "SDK only Debug",
+			"configuration": "Debug",
+			"configurePreset": "xcode",
+			"inherits": [
+				"xcode-quiet"
+			],
+			"targets": [
+				"OpenCL-SDK",
+				"OpenCL-SDK-DLL"
+			]
+		},
+		{
+			"name": "xcode-release",
+			"displayName": "Release",
+			"configuration": "Release",
+			"configurePreset": "xcode",
+			"inherits": [
+				"xcode-quiet"
+			]
+		},
+		{
+			"name": "xcode-debug",
+			"displayName": "Debug",
+			"configuration": "Debug",
+			"configurePreset": "xcode",
+			"inherits": [
+				"xcode-quiet"
+			]
 		}
 	],
 	"testPresets": [
@@ -176,6 +230,24 @@
 			"displayName": "Release",
 			"configuration": "Release",
 			"configurePreset": "ninja-multi-config-gcc",
+			"execution": {
+				"jobs": 0
+			}
+		},
+		{
+			"name": "xcode-debug",
+			"displayName": "Debug",
+			"configuration": "Debug",
+			"configurePreset": "xcode",
+			"execution": {
+				"jobs": 0
+			}
+		},
+		{
+			"name": "xcode-release",
+			"displayName": "Release",
+			"configuration": "Release",
+			"configurePreset": "xcode",
 			"execution": {
 				"jobs": 0
 			}
@@ -239,6 +311,36 @@
 				{
 					"type": "test",
 					"name": "ninja-multi-config-gcc-debug"
+				}
+			]
+		},
+		{
+			"name": "xcode",
+			"displayName": "XCode",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "xcode"
+				},
+				{
+					"type": "build",
+					"name": "xcode-sdk-debug"
+				},
+				{
+					"type": "build",
+					"name": "xcode-release"
+				},
+				{
+					"type": "build",
+					"name": "xcode-debug"
+				},
+				{
+					"type": "test",
+					"name": "xcode-release"
+				},
+				{
+					"type": "test",
+					"name": "xcode-debug"
 				}
 			]
 		}
