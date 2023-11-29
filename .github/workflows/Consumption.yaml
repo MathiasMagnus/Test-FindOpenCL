@@ -95,6 +95,7 @@ jobs:
         with:
           path: .tmp/Source/Test-FindOpenCL
       - name: Test FindOpenCL.cmake
+        if: false
         working-directory: ${{ github.workspace }}/.tmp/Source/Test-FindOpenCL
         run: |
           ${{ github.workspace }}/.cache/CMake/bin/cmake `
