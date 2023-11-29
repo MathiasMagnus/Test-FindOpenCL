@@ -90,6 +90,7 @@ jobs:
             --install ${{ github.workspace }}/.tmp/Build/CMake `
             --config Release `
             --prefix ${{ github.workspace }}/.cache/CMake/
+          Remove-Item -Recurse -Force '${{ github.workspace }}/.tmp/Source','${{ github.workspace }}/.tmp/Build'
       - name: Checkout Test-FindOpenCL
         uses: actions/checkout@v3
         with:
