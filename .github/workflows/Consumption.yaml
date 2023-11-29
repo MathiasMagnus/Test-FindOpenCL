@@ -74,7 +74,7 @@ jobs:
         if: steps.cache-cmake.outputs.cache-hit != 'true'
         run: |
           if ($IsWindows) {
-            $VS_ROOT = Get-CimInstance MSFT_VSInstance | Sort-Object -Property Version -Descending | Select-Object -First 1 -ExpandProperty InstallLocation
+            $VS_ROOT = Get-CimInstance MSFT_VSInstance -Namespace root/cimv2/vs | Sort-Object -Property Version -Descending | Select-Object -First 1 -ExpandProperty InstallLocation
             Import-Module "$VS_ROOT\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
             Enter-VsDevShell -VsInstallPath "$VS_ROOT" -SkipAutomaticLocation -DevCmdArguments "-host_arch=x64 -arch=x64"
           }
