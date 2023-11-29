@@ -9,8 +9,7 @@
 		{
 			"name": "layout",
 			"hidden": true,
-			"binaryDir": "${sourceDir}/build/${presetName}",
-			"installDir": "${sourceDir}/install/${presetName}"
+			"binaryDir": "${sourceDir}/build/"
 		},
 		{
 			"name": "generator-msbuild",
@@ -25,6 +24,25 @@
 			"name": "generator-ninja-multi-config",
 			"hidden": true,
 			"generator": "Ninja Multi-Config"
+		},
+		{
+			"name": "generator-xcode",
+			"hidden": true,
+			"generator": "Xcode"
+		},
+		{
+			"name": "cache-variables-test-findopencl",
+			"hidden": true,
+			"cacheVariables": {
+				"TEST_FINDOPENCL_HEADERS_URL": "https://github.com/StreamHPC/OpenCL-Headers.git",
+				"TEST_FINDOPENCL_HEADERS_TAG": "release-cd",
+				"TEST_FINDOPENCL_CLHPP_URL": "https://github.com/StreamHPC/OpenCL-CLHPP.git",
+				"TEST_FINDOPENCL_CLHPP_TAG": "no-system-headers-macos",
+				"TEST_FINDOPENCL_ICD_LOADER_URL": "https://github.com/StreamHPC/OpenCL-ICD-Loader.git",
+				"TEST_FINDOPENCL_ICD_LOADER_TAG": "release-cd-plus-static",
+				"TEST_FINDOPENCL_SDK_URL": "https://github.com/StreamHPC/OpenCL-SDK.git",
+				"TEST_FINDOPENCL_SDK_TAG": "two-way-compat"
+			}
 		},
 		{
 			"name": "toolchain-msbuild-c/c++-msvc-v143",
@@ -52,7 +70,8 @@
 			"inherits": [
 				"layout",
 				"generator-msbuild",
-				"toolchain-msbuild-c/c++-msvc-v143"
+				"toolchain-msbuild-c/c++-msvc-v143",
+				"cache-variables-test-findopencl"
 			]
 		},
 		{
@@ -61,8 +80,22 @@
 			"inherits": [
 				"layout",
 				"generator-ninja-multi-config",
-				"toolchain-makefiles-c/c++-gcc"
+				"toolchain-makefiles-c/c++-gcc",
+				"cache-variables-test-findopencl"
 			]
+		},
+		{
+			"name": "xcode",
+			"displayName": "XCode",
+			"inherits": [
+				"layout",
+				"generator-xcode",
+				"cache-variables-test-findopencl"
+			],
+			"cacheVariables": {
+				"CMAKE_FIND_FRAMEWORK": "LAST",
+				"CMAKE_FIND_APPBUNDLE": "LAST"
+			}
 		}
 	],
 	"buildPresets": [
@@ -87,6 +120,13 @@
 			]
 		},
 		{
+			"name": "xcode-quiet",
+			"hidden": true,
+			"nativeToolOptions": [
+				"-quiet"
+			]
+		},
+		{
 			"name": "msbuild-msvc-v143-sdk-debug",
 			"displayName": "SDK only Debug",
 			"configuration": "Debug",
@@ -97,7 +137,8 @@
 			],
 			"targets": [
 				"OpenCL-SDK",
-				"OpenCL-SDK-DLL"
+				"OpenCL-SDK-DLL",
+				"OpenCL-SDK-Static-DLL"
 			]
 		},
 		{
@@ -127,7 +168,8 @@
 			"configurePreset": "ninja-multi-config-gcc",
 			"targets": [
 				"OpenCL-SDK",
-				"OpenCL-SDK-DLL"
+				"OpenCL-SDK-DLL",
+				"OpenCL-SDK-Static-DLL"
 			]
 		},
 		{
@@ -141,6 +183,38 @@
 			"displayName": "Debug",
 			"configuration": "Debug",
 			"configurePreset": "ninja-multi-config-gcc"
+		},
+		{
+			"name": "xcode-sdk-debug",
+			"displayName": "SDK only Debug",
+			"configuration": "Debug",
+			"configurePreset": "xcode",
+			"inherits": [
+				"xcode-quiet"
+			],
+			"targets": [
+				"OpenCL-SDK",
+				"OpenCL-SDK-DLL",
+				"OpenCL-SDK-Static-DLL"
+			]
+		},
+		{
+			"name": "xcode-release",
+			"displayName": "Release",
+			"configuration": "Release",
+			"configurePreset": "xcode",
+			"inherits": [
+				"xcode-quiet"
+			]
+		},
+		{
+			"name": "xcode-debug",
+			"displayName": "Debug",
+			"configuration": "Debug",
+			"configurePreset": "xcode",
+			"inherits": [
+				"xcode-quiet"
+			]
 		}
 	],
 	"testPresets": [
@@ -151,6 +225,9 @@
 			"configurePreset": "msbuild-msvc-v143",
 			"environment": {
 				"CTEST_PARALLEL_LEVEL": "$env{NUMBER_OF_PROCESSORS}"
+			},
+			"output": {
+				"outputOnFailure": true
 			}
 		},
 		{
@@ -176,6 +253,24 @@
 			"displayName": "Release",
 			"configuration": "Release",
 			"configurePreset": "ninja-multi-config-gcc",
+			"execution": {
+				"jobs": 0
+			}
+		},
+		{
+			"name": "xcode-debug",
+			"displayName": "Debug",
+			"configuration": "Debug",
+			"configurePreset": "xcode",
+			"execution": {
+				"jobs": 0
+			}
+		},
+		{
+			"name": "xcode-release",
+			"displayName": "Release",
+			"configuration": "Release",
+			"configurePreset": "xcode",
 			"execution": {
 				"jobs": 0
 			}
@@ -239,6 +334,36 @@
 				{
 					"type": "test",
 					"name": "ninja-multi-config-gcc-debug"
+				}
+			]
+		},
+		{
+			"name": "xcode",
+			"displayName": "XCode",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "xcode"
+				},
+				{
+					"type": "build",
+					"name": "xcode-sdk-debug"
+				},
+				{
+					"type": "build",
+					"name": "xcode-release"
+				},
+				{
+					"type": "build",
+					"name": "xcode-debug"
+				},
+				{
+					"type": "test",
+					"name": "xcode-release"
+				},
+				{
+					"type": "test",
+					"name": "xcode-debug"
 				}
 			]
 		}

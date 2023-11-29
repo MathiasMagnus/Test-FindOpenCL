@@ -15,4 +15,5 @@ target_compile_definitions(UseImported
         CL_HPP_TARGET_OPENCL_VERSION=300
         CL_HPP_MINIMUM_OPENCL_VERSION=300
         CL_HPP_ENABLE_EXCEPTIONS)
+target_compile_features(UseImported PRIVATE cxx_std_11)
 add_test(NAME UseImported COMMAND UseImported)

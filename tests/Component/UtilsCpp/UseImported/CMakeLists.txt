@@ -15,7 +15,5 @@ target_compile_definitions(UseUtils
         CL_HPP_TARGET_OPENCL_VERSION=300
         CL_HPP_MINIMUM_OPENCL_VERSION=300
         CL_HPP_ENABLE_EXCEPTIONS)
-target_compile_features(UseUtils
-    PRIVATE
-        cxx_std_17)
+target_compile_features(UseUtils PRIVATE cxx_std_17)
 add_test(NAME UseUtils COMMAND UseUtils)

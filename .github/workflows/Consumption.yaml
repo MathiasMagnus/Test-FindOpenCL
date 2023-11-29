@@ -1,0 +1,103 @@
+name: Consumption
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  check-hash:
+    runs-on: ubuntu-latest
+    outputs:
+      hash: ${{ steps.check.outputs.hash }}
+    steps:
+      - name: Check feature branch commit hash
+        id: check
+        shell: pwsh
+        run: |
+          $BranchInfo = git ls-remote https://github.com/MathiasMagnus/CMake.git | `
+            Select-String opencl-components
+          $BranchInfo -match '^[0-9a-f]+' | Out-Null
+          Add-Content $env:GITHUB_OUTPUT -Value "hash=$($matches[0])"
+
+  workflow:
+    needs: check-hash
+    runs-on: ${{ matrix.runs-on }}
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - runs-on: ubuntu-latest
+            preset: ninja-multi-config-gcc
+            ninja-url: https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-linux.zip
+          - runs-on: windows-latest
+            preset: msbuild-msvc-v143
+            ninja-url: https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-win.zip
+          - runs-on: macos-latest
+            preset: xcode
+            ninja-url: https://github.com/ninja-build/ninja/releases/download/v1.11.1/ninja-mac.zip
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Cache Ninja
+        id: cache-ninja
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{ github.workspace }}/.cache/Ninja/
+          key: ${{ runner.os }}-ninja-${{ matrix.ninja-url }}
+      - name: Download Ninja
+        if: steps.cache-ninja.outputs.cache-hit != 'true'
+        run: |
+          New-Item -Type Directory ${{ github.workspace }}/.tmp/Download | Out-Null
+          Invoke-WebRequest ${{ matrix.ninja-url }} -OutFile ${{ github.workspace }}/.tmp/Download/Ninja.zip
+          Expand-Archive ${{ github.workspace }}/.tmp/Download/Ninja.zip -DestinationPath ${{ github.workspace }}/.cache/Ninja/
+          Remove-Item ${{ github.workspace }}/.tmp/Download/Ninja.zip
+      - name: Add Ninja to PATH
+        run: Add-Content $env:GITHUB_PATH -Value "${{ github.workspace }}/.cache/Ninja"
+      - name: Cache CMake
+        id: cache-cmake
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace }}/.cache/CMake/
+          key: ${{ runner.os }}-cmake-${{ needs.check-hash.outputs.hash }}
+      - name: Checkout CMake
+        if: steps.cache-cmake.outputs.cache-hit != 'true'
+        uses: actions/checkout@v3
+        with:
+          repository: MathiasMagnus/CMake
+          ref: opencl-components
+          path: .tmp/Source/CMake
+      - name: Build CMake
+        if: steps.cache-cmake.outputs.cache-hit != 'true'
+        run: |
+          if ($IsWindows) {
+            $VS_ROOT = Get-CimInstance MSFT_VSInstance -Namespace root/cimv2/vs | Sort-Object -Property Version -Descending | Select-Object -First 1 -ExpandProperty InstallLocation
+            Import-Module "$VS_ROOT\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
+            Enter-VsDevShell -VsInstallPath "$VS_ROOT" -SkipAutomaticLocation -DevCmdArguments "-host_arch=x64 -arch=x64"
+          }
+          cmake -G 'Ninja Multi-Config' `
+            -D CMAKE_MAKE_PROGRAM='${{ github.workspace }}/.cache/Ninja/ninja' `
+            -S ${{ github.workspace }}/.tmp/Source/CMake `
+            -B ${{ github.workspace }}/.tmp/Build/CMake
+          cmake `
+            --build ${{ github.workspace }}/.tmp/Build/CMake `
+            --parallel $([Environment]::ProcessorCount) `
+            --config Release
+          cmake `
+            --install ${{ github.workspace }}/.tmp/Build/CMake `
+            --config Release `
+            --prefix ${{ github.workspace }}/.cache/CMake/
+          Remove-Item -Recurse -Force '${{ github.workspace }}/.tmp/Source','${{ github.workspace }}/.tmp/Build'
+      - name: Checkout Test-FindOpenCL
+        uses: actions/checkout@v3
+        with:
+          path: .tmp/Source/Test-FindOpenCL
+      - name: Test FindOpenCL.cmake
+        working-directory: ${{ github.workspace }}/.tmp/Source/Test-FindOpenCL
+        run: |
+          ${{ github.workspace }}/.cache/CMake/bin/cmake `
+            --workflow `
+            --preset ${{ matrix.preset }}
