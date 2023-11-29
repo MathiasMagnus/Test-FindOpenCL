@@ -2,10 +2,18 @@ cmake_minimum_required(VERSION 3.26)
 cmake_policy(VERSION 3.26)
 enable_testing()
 
-project(CMakeFeature2 LANGUAGES C CXX)
+project(Test-FindOpenCL LANGUAGES C CXX)
 
-set(CMakeFeature2_USE_KHRONOS_RELEASE "v2023.04.17" CACHE STRING "Tag hash of Khronos release to fetch to test with")
-set(CMakeFeature2_EP_BASE "external" CACHE PATH "Path of external projects (relative to PROJECT_BINARY_DIR)")
+set(TEST_FINDOPENCL_USE_TAG "v2023.04.17" CACHE STRING "Tag hash of Khronos release to fetch to test with")
+set(TEST_FINDOPENCL_EP_BASE "external" CACHE PATH "Path of external projects (relative to PROJECT_BINARY_DIR)")
+set(TEST_FINDOPENCL_HEADERS_URL ${TEST_FINDOPENCL_USE_TAG} CACHE STRING "Git repo URL of OpenCL-Headers")
+set(TEST_FINDOPENCL_HEADERS_TAG ${TEST_FINDOPENCL_USE_TAG} CACHE STRING "Git tag of OpenCL-Headers")
+set(TEST_FINDOPENCL_CLHPP_URL ${TEST_FINDOPENCL_USE_TAG} CACHE STRING "Git repo URL of OpenCL-CLHPP")
+set(TEST_FINDOPENCL_CLHPP_TAG ${TEST_FINDOPENCL_USE_TAG} CACHE STRING "Git tag of OpenCL-CLHPP")
+set(TEST_FINDOPENCL_ICD_LOADER_URL ${TEST_FINDOPENCL_USE_TAG} CACHE STRING "Git repo URL of OpenCL-ICD-Loader")
+set(TEST_FINDOPENCL_ICD_LOADER_TAG ${TEST_FINDOPENCL_USE_TAG} CACHE STRING "Git tag of OpenCL-ICD-Loader")
+set(TEST_FINDOPENCL_SDK_URL ${TEST_FINDOPENCL_USE_TAG} CACHE STRING "Git repo URL of OpenCL-SDK")
+set(TEST_FINDOPENCL_SDK_TAG ${TEST_FINDOPENCL_USE_TAG} CACHE STRING "Git tag of OpenCL-SDK")
 
 set(EP_INSTALL_ROOT "${PROJECT_BINARY_DIR}/${CMakeFeature2_EP_BASE}/Install")
 
@@ -60,18 +68,16 @@ include(ExternalProject)
 set_directory_properties(PROPERTIES EP_BASE "${PROJECT_BINARY_DIR}/${CMakeFeature2_EP_BASE}")
 
 ExternalProject_Add(OpenCL-Headers
-    GIT_REPOSITORY         https://github.com/KhronosGroup/OpenCL-Headers.git
-    GIT_TAG                ${CMakeFeature2_USE_KHRONOS_RELEASE}
+    GIT_REPOSITORY         ${TEST_FINDOPENCL_HEADERS_URL}
+    GIT_TAG                ${TEST_FINDOPENCL_HEADERS_TAG}
     GIT_SUBMODULES_RECURSE OFF
     GIT_SUBMODULES         ""
     GIT_SHALLOW            ON
     CMAKE_CACHE_ARGS       "${Common_OPTIONS};${OpenCL-Headers_OPTIONS}"
 )
 ExternalProject_Add(OpenCL-CLHPP
-    #GIT_REPOSITORY         https://github.com/KhronosGroup/OpenCL-CLHPP.git
-    #GIT_TAG                ${CMakeFeature2_USE_KHRONOS_RELEASE}
-    GIT_REPOSITORY         https://github.com/StreamHPC/OpenCL-CLHPP.git
-    GIT_TAG                no-system-headers-macos
+    GIT_REPOSITORY         ${TEST_FINDOPENCL_CLHPP_URL}
+    GIT_TAG                ${TEST_FINDOPENCL_CLHPP_TAG}
     GIT_SUBMODULES_RECURSE OFF
     GIT_SUBMODULES         ""
     GIT_SHALLOW            ON
@@ -79,31 +85,43 @@ ExternalProject_Add(OpenCL-CLHPP
     DEPENDS                OpenCL-Headers
 )
 ExternalProject_Add(OpenCL-ICD-Loader
-    GIT_REPOSITORY         https://github.com/KhronosGroup/OpenCL-ICD-Loader.git
-    GIT_TAG                ${CMakeFeature2_USE_KHRONOS_RELEASE}
+    GIT_REPOSITORY         ${TEST_FINDOPENCL_ICD_LOADER_URL}
+    GIT_TAG                ${TEST_FINDOPENCL_ICD_LOADER_TAG}
     GIT_SUBMODULES_RECURSE OFF
     GIT_SUBMODULES         ""
     GIT_SHALLOW            ON
     CMAKE_CACHE_ARGS       "${Common_OPTIONS};${OpenCL-ICD-Loader_OPTIONS}"
     DEPENDS                OpenCL-Headers
 )
+ExternalProject_Add(OpenCL-ICD-Loader-Static
+    GIT_REPOSITORY         ${TEST_FINDOPENCL_ICD_LOADER_URL}
+    GIT_TAG                ${TEST_FINDOPENCL_ICD_LOADER_TAG}
+    GIT_SUBMODULES_RECURSE OFF
+    GIT_SUBMODULES         ""
+    GIT_SHALLOW            ON
+    CMAKE_CACHE_ARGS       "${Common_OPTIONS};${OpenCL-ICD-Loader_OPTIONS};-DOPENCL_ICD_LOADER_BUILD_SHARED_LIBS:BOOL=OFF"
+    DEPENDS                OpenCL-Headers
+)
 ExternalProject_Add(OpenCL-SDK
-    #GIT_REPOSITORY         https://github.com/KhronosGroup/OpenCL-SDK.git
-    #GIT_TAG                ${CMakeFeature2_USE_KHRONOS_RELEASE}
-    GIT_REPOSITORY         https://github.com/StreamHPC/OpenCL-SDK.git
-    GIT_TAG                install-fixes-and-clhpp-no-framework-support
+    GIT_REPOSITORY         ${TEST_FINDOPENCL_SDK_URL}
+    GIT_TAG                ${TEST_FINDOPENCL_SDK_TAG}
     GIT_SUBMODULES_RECURSE OFF
     GIT_SHALLOW            ON
     CMAKE_CACHE_ARGS       "${Common_OPTIONS};${OpenCL-SDK_OPTIONS}"
 )
 ExternalProject_Add(OpenCL-SDK-DLL
-    #GIT_REPOSITORY         https://github.com/KhronosGroup/OpenCL-SDK.git
-    #GIT_TAG                ${CMakeFeature2_USE_KHRONOS_RELEASE}
-    GIT_REPOSITORY         https://github.com/StreamHPC/OpenCL-SDK.git
-    GIT_TAG                install-fixes-and-clhpp-no-framework-support
+    GIT_REPOSITORY         ${TEST_FINDOPENCL_SDK_URL}
+    GIT_TAG                ${TEST_FINDOPENCL_SDK_TAG}
     GIT_SUBMODULES_RECURSE OFF
     GIT_SHALLOW            ON
     CMAKE_CACHE_ARGS       "${Common_OPTIONS};${OpenCL-SDK_OPTIONS};-DBUILD_SHARED_LIBS:BOOL=ON"
+)
+ExternalProject_Add(OpenCL-SDK-Static-DLL
+    GIT_REPOSITORY         ${TEST_FINDOPENCL_SDK_URL}
+    GIT_TAG                ${TEST_FINDOPENCL_SDK_TAG}
+    GIT_SUBMODULES_RECURSE OFF
+    GIT_SHALLOW            ON
+    CMAKE_CACHE_ARGS       "${Common_OPTIONS};${OpenCL-SDK_OPTIONS};-DOPENCL_ICD_LOADER_BUILD_SHARED_LIBS:BOOL=OFF;-DBUILD_SHARED_LIBS:BOOL=ON"
 )
 
 add_subdirectory(tests)
